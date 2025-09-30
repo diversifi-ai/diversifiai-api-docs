@@ -1,51 +1,72 @@
-# Scalar Docs Starter Kit
+# Diversifi API Docs
 
-[![Contributors](https://img.shields.io/github/contributors/scalar/starter)](https://github.com/scalar/starter/graphs/contributors)
-[![GitHub License](https://img.shields.io/github/license/scalar/starter)](https://github.com/scalar/starter/blob/main/LICENSE)
-[![Twitter](https://img.shields.io/twitter/follow/scalar)](https://x.com/scalar)
-[![Discord](https://img.shields.io/discord/1135330207960678410?style=flat&color=5865F2)](https://discord.gg/scalar)
+This repository contains configuration and automation to publish the **Dev API documentation** to [Scalar](https://scalar.com).
 
-Welcome to the Scalar Docs starter kit! This project provides you with a complete foundation to create beautiful, interactive API documentation using Scalar's powerful documentation platform.
+## Requirements
 
-## Preview
+- Node.js (>= 20)
+- Scalar CLI  
+  Install globally:
+  ```bash
+  npm install -g @scalar/cli
+  ```
+- `jq` and `curl` available in your system
+- A valid **Scalar API token**
 
-Use the Scalar CLI to render a live preview of your project locally:
+## Setup
+
+1. Save your Scalar API token as an environment variable:
+
+   ```bash
+   export SCALAR_TOKEN="your_api_key_here"
+   ```
+
+2. Make sure the script is executable:
+
+   ```bash
+   chmod +x scripts/publish-scalar-dev.sh
+   ```
+
+## Usage
+
+Run the script to validate the OpenAPI spec and publish a new version:
 
 ```bash
-npx @scalar/cli project preview
+./scripts/publish-scalar-dev.sh
 ```
 
-This will start a local development server where you can view and interact with your documentation in real-time.
+The script will:
 
-## Validate Configuration
+1. Validate the OpenAPI document from  
+   [`https://dev.diversifi.ai/api_v1/openapi.json`](https://dev.diversifi.ai/api_v1/openapi.json)  
+2. Generate a valid semver version (either from the spec or time-based)  
+3. Automatically increment the version if the current one already exists  
+4. Publish to Scalar under the namespace/slug:  
+   ```
+   diversifi-0qxwn/dev
+   ```
 
-Ensure your project configuration is properly set up by running the configuration validation command:
+## Output
 
-```bash
-npx @scalar/cli project check-config
+After a successful run, you’ll see:
+
+```
+Published version: vX.Y.Z
+URL: https://scalar.com/registry/diversifi-0qxwn/dev
 ```
 
-This will verify that your `scalar.config.json` file contains valid settings and help identify any configuration issues.
+## GitHub Actions
 
-## Project Structure
+Publishing is also automated for the `dev-api-docs` branch using  
+[`.github/workflows/publish-scalar.yml`](.github/workflows/publish-scalar.yml).  
+The workflow installs dependencies and executes the same script automatically on every push.
+
+Make sure you set the **secret** `SCALAR_TOKEN` in your repository settings:
 
 ```
-starter/
-├── docs/
-│   ├── api-reference/      # OpenAPI documents
-│   └── guides/             # Free-form text
-├── scalar.config.json      # Configuration
+Settings → Secrets and variables → Actions → New repository secret
 ```
 
-## Configuration
+Name: `SCALAR_TOKEN`  
+Value: your Scalar API key
 
-All project configuration is managed through the [`scalar.config.json`](./scalar.config.json) file. This file controls:
-
-- Documentation structure and navigation
-- OpenAPI document sources
-- Theme and styling options
-- Build and deployment settings
-
-## Documentation
-
-For comprehensive guides on using Scalar Docs and setting up GitHub Sync, [read the full documentation](https://guides.scalar.com/scalar/scalar-docs/github-sync).

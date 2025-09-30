@@ -1,2 +1,15 @@
-# Auto-generated files
-.scalar
+dev-api-docs/node_modules/
+dev-api-docs/package-lock.json
+prod-api-docs/node_modules/
+prod-api-docs/package-lock.json
+*.log
+npm-debug.log*
+.DS_Store
+*.swp
+*.swo
+*.idea/
+.vscode/
+dist/
+out/
+.env
+.env.*
