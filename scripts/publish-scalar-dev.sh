@@ -55,12 +55,6 @@ cat > "${BUILD_DIR}/index.html" <<HTML
   <title>DiversiFi API Docs (DEV)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="Cache-Control" content="no-store" />
-  <style>
-    html,body{margin:0;padding:0;background:#0f172a;color:#e2e8f0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Arial}
-    .wrap{max-width:1100px;margin:24px auto;padding:16px}
-    .meta{font:14px/1.4 system-ui;opacity:.8;margin-bottom:8px}
-    .meta code{background:#111827;border:1px solid #1f2937;border-radius:6px;padding:2px 6px}
-  </style>
 </head>
 <body>
   <div class="wrap">
