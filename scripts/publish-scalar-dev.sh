@@ -52,18 +52,16 @@ cat > "${BUILD_DIR}/index.html" <<HTML
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>DiversiFi API Docs (DEV)</title>
+  <title>API Reference</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Cache-Control" content="no-store" />
 </head>
 <body>
+  <div id="app"></div>
   <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
   <script>
     Scalar.createApiReference('#app', {
       url: '${SPEC_URL}',
-      proxyUrl: 'https://proxy.scalar.com',
-      layout: 'modern',
-      theme: 'purple'
+      proxyUrl: 'https://proxy.scalar.com'
     })
   </script>
 </body>
