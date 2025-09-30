@@ -9,15 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install tooling
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y jq curl
-          npm i -g @scalar/cli
-
-      - name: Publish to Scalar
+      - run: sudo apt-get update -y && sudo apt-get install -y jq curl
+      - name: Run publish script
         env:
           SCALAR_TOKEN: ${{ secrets.SCALAR_TOKEN }}
-        run: |
-          bash scripts/publish-scalar-dev.sh
+        run: bash scripts/publish-scalar-dev.sh
