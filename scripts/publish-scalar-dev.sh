@@ -57,14 +57,6 @@ cat > "${BUILD_DIR}/index.html" <<HTML
   <meta http-equiv="Cache-Control" content="no-store" />
 </head>
 <body>
-  <div class="wrap">
-    <div class="meta">
-      <div>Environment: <strong>DEV</strong></div>
-      <div>Spec URL: <code>${SPEC_URL}</code></div>
-      <div>Published version: <code>${VER}</code></div>
-    </div>
-    <div id="app"></div>
-  </div>
   <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
   <script>
     Scalar.createApiReference('#app', {
