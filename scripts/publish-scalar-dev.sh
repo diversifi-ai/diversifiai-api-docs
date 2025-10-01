@@ -77,4 +77,4 @@ if [[ -n "$CLOUDFRONT_DISTRIBUTION_ID" ]]; then
 fi
 
 echo "Done."
-echo "DEV URL: https://docs-api-dev.diversifi.ai"
+echo "DEV URL: https://dev-docs.diversifi.ai"
