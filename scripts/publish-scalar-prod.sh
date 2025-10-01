@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# === Config ===
 NAMESPACE="${NAMESPACE:-diversifi-0qxwn}"
 SLUG="${SLUG:-prod}"
 SPEC_URL="${SPEC_URL:-https://platform.diversifi.ai/api_v1/openapi.json}"
@@ -11,50 +10,18 @@ CLI="npx -y @scalar/cli@latest"
 
 : "${SCALAR_TOKEN:?Please export SCALAR_TOKEN first}"
 
-# === Preflight checks ===
 command -v curl >/dev/null || { echo "curl not found"; exit 1; }
 command -v jq   >/dev/null || { echo "jq not found"; exit 1; }
 command -v aws  >/dev/null || { echo "aws CLI not found"; exit 1; }
 
-# === Scalar CLI auth (no telemetry) ===
 export SCALAR_TELEMETRY_DISABLED=1
 $CLI auth logout >/dev/null 2>&1 || true
 $CLI auth login --token "$SCALAR_TOKEN" >/dev/null
 
-# === Fetch original spec and patch it ===
-# Why patch? Ensure UI uses /api_v1 and requires X-API-Key on Try It
-TMP_SPEC_ORIG="$(mktemp -t spec-orig.XXXX.json)"
-TMP_SPEC_PATCHED="$(mktemp -t spec-patched.XXXX.json)"
-trap 'rm -f "$TMP_SPEC_ORIG" "$TMP_SPEC_PATCHED"' EXIT
+echo "Validating OpenAPI spec..."
+$CLI document validate "$SPEC_URL"
 
-curl -fsSL "$SPEC_URL" > "$TMP_SPEC_ORIG"
-
-# Patch rules:
-# 1) set OpenAPI "servers" to include /api_v1 base
-# 2) ensure components.securitySchemes.ApiKeyAuth (header X-API-Key)
-# 3) apply global security requirement so Try It sends the header
-jq '
-  .servers = [
-    { "url": "https://platform.diversifi.ai/api_v1" },
-    { "url": "https://api.diversifi.ai/api_v1" }
-  ]
-  |
-  (.components //= {}) |
-  (.components.securitySchemes //= {}) |
-  (.components.securitySchemes.ApiKeyAuth = {
-    "type": "apiKey",
-    "in": "header",
-    "name": "X-API-Key"
-  })
-  |
-  (.security = [ { "ApiKeyAuth": [] } ])
-' "$TMP_SPEC_ORIG" > "$TMP_SPEC_PATCHED"
-
-echo "Validating OpenAPI spec (patched)..."
-$CLI document validate "$TMP_SPEC_PATCHED"
-
-# === Extract and normalize version from patched spec (semver x.y.z) ===
-RAW_VER="$(jq -r '.info.version // empty' "$TMP_SPEC_PATCHED")"
+RAW_VER="$(curl -fsSL "$SPEC_URL" | jq -r '.info.version // empty')"
 VER="${RAW_VER#v}"
 VER="${VER%%-*}"
 VER="${VER%%+*}"
@@ -65,9 +32,8 @@ if [[ ! "$VER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   exit 1
 fi
 
-# === Publish patched spec to Scalar Registry ===
 echo "Publishing to Scalar Registry (namespace=$NAMESPACE, slug=$SLUG, version=$VER)..."
-OUT=$($CLI registry publish "$TMP_SPEC_PATCHED" \
+OUT=$($CLI registry publish "$SPEC_URL" \
   --namespace "$NAMESPACE" \
   --slug "$SLUG" \
   --version "$VER" \
@@ -78,7 +44,6 @@ echo "Published version: v$VER"
 echo "Public (latest): https://scalar.com/@$NAMESPACE/apis/$SLUG"
 echo "Exact version  : https://registry.scalar.com/@$NAMESPACE/apis/$SLUG/$VER"
 
-# === Build a minimal static UI page ===
 BUILD_DIR="${BUILD_DIR:-./public}"
 mkdir -p "$BUILD_DIR"
 
@@ -94,8 +59,6 @@ cat > "${BUILD_DIR}/index.html" <<HTML
   <div id="app"></div>
   <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
   <script>
-    // The UI will primarily honor the "servers" defined in the patched spec.
-    // The "url" below is a fallback to load the document itself.
     Scalar.createApiReference('#app', {
       url: '${SPEC_URL}',
       proxyUrl: 'https://proxy.scalar.com'
@@ -105,18 +68,13 @@ cat > "${BUILD_DIR}/index.html" <<HTML
 </html>
 HTML
 
-# === Upload to S3 and optionally invalidate CloudFront ===
 echo "Uploading static site to s3://${S3_BUCKET}/ ..."
-aws s3 cp "${BUILD_DIR}/index.html" "s3://${S3_BUCKET}/index.html" \
-  --content-type text/html --cache-control "no-store"
+aws s3 cp "${BUILD_DIR}/index.html" "s3://${S3_BUCKET}/index.html" --content-type text/html --cache-control "no-store"
 
 if [[ -n "$CLOUDFRONT_DISTRIBUTION_ID" ]]; then
   echo "Creating CloudFront invalidation on ${CLOUDFRONT_DISTRIBUTION_ID} ..."
-  aws cloudfront create-invalidation \
-    --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
-    --paths '/index.html' >/dev/null
+  aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths '/index.html' >/dev/null
 fi
 
 echo "Done."
-echo "Prod URL: https://docs.diversifi.ai"
-
+echo "DEV URL: https://docs.diversifi.ai"
