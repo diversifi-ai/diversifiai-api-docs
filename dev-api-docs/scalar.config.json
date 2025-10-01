@@ -1,0 +1,12 @@
+{
+  "references": [
+    {
+      "name": "API Reference Dev",
+      "path": "https://dev.diversifi.ai/api_v1/openapi.json"
+    }
+  ],
+  "guides": [],
+  "siteConfig": {
+    "theme": "purple"
+  }
+}
