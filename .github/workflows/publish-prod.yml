@@ -1,4 +1,4 @@
-name: Publish Dev API to Scalar
+name: Publish Prod API to Scalar
 
 on:
   push:
