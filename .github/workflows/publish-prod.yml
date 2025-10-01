@@ -32,5 +32,5 @@ jobs:
       - name: Publish and Upload
         env:
           SCALAR_TOKEN: ${{ secrets.SCALAR_TOKEN }}
-          S3_BUCKET: docs-api-dev.diversifi.ai
+          S3_BUCKET: docs-api-diversifi-ai
         run: bash scripts/publish-scalar-prod.sh
