@@ -1,8 +1,8 @@
 name: Publish Dev API to Scalar
 
 on:
-  push:
-    branches: [ "dev-api-docs" ]
+  repository_dispatch:
+    types: [trigger-dev]
 
 jobs:
   publish-to-scalar:
