@@ -1,8 +1,12 @@
 name: Publish Dev API to Scalar
 
 on:
-  repository_dispatch:
-    types: [trigger-dev]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "trigger workflow"
+        required: false
+        default: ""
 
 jobs:
   publish-to-scalar:
