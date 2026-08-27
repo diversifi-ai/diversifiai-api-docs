@@ -13,9 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # @scalar/cli@latest (>=2.1.0) requires Node >= 24; on Node 20 it crashes silently.
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:

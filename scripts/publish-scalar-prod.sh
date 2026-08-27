@@ -3,7 +3,10 @@ set -euo pipefail
 
 NAMESPACE="${NAMESPACE:-diversifi-0qxwn}"
 SLUG="${SLUG:-prod}"
-SPEC_URL="${SPEC_URL:-https://platform.diversifi.ai/api_v1/openapi.json}"
+# Production origins no longer serve a live /openapi.json (the endpoint was disabled at the
+# origin for security). The diversifi-be deploy pipeline exports the spec from the deployed
+# image and uploads it to the docs S3 bucket, where it is served same-origin as the site.
+SPEC_URL="${SPEC_URL:-https://docs.diversifi.ai/openapi.json}"
 S3_BUCKET="${S3_BUCKET:-docs-api-diversifi-ai}"
 CLOUDFRONT_DISTRIBUTION_ID="${CLOUDFRONT_DISTRIBUTION_ID:-}"
 CLI="npx -y @scalar/cli@latest"
@@ -16,7 +19,8 @@ command -v aws  >/dev/null || { echo "aws CLI not found"; exit 1; }
 
 export SCALAR_TELEMETRY_DISABLED=1
 $CLI auth logout >/dev/null 2>&1 || true
-$CLI auth login --token "$SCALAR_TOKEN" >/dev/null
+# Don't swallow login output — the CLI reports failures (bad token, unsupported node) on stdout.
+$CLI auth login --token "$SCALAR_TOKEN"
 
 echo "Validating OpenAPI spec..."
 $CLI document validate "$SPEC_URL"
@@ -77,4 +81,4 @@ if [[ -n "$CLOUDFRONT_DISTRIBUTION_ID" ]]; then
 fi
 
 echo "Done."
-echo "DEV URL: https://docs.diversifi.ai"
+echo "PROD URL: https://docs.diversifi.ai"
