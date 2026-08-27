@@ -3,7 +3,10 @@ set -euo pipefail
 
 NAMESPACE="${NAMESPACE:-diversifi-0qxwn}"
 SLUG="${SLUG:-dev}"
-SPEC_URL="${SPEC_URL:-https://dev.diversifi.ai/api_v1/openapi.json}"
+# The live /openapi.json is no longer exposed (dev.diversifi.ai returns 403). The diversifi-be
+# dev deploy pipeline exports a WMS-only spec from the deployed image and uploads it to the
+# dev docs S3 bucket, served same-origin as the site.
+SPEC_URL="${SPEC_URL:-https://dev-docs.diversifi.ai/openapi.json}"
 S3_BUCKET="${S3_BUCKET:-docs-api-dev-diversifi-ai}"
 CLOUDFRONT_DISTRIBUTION_ID="${CLOUDFRONT_DISTRIBUTION_ID:-}"
 CLI="npx -y @scalar/cli@latest"
@@ -16,7 +19,8 @@ command -v aws  >/dev/null || { echo "aws CLI not found"; exit 1; }
 
 export SCALAR_TELEMETRY_DISABLED=1
 $CLI auth logout >/dev/null 2>&1 || true
-$CLI auth login --token "$SCALAR_TOKEN" >/dev/null
+# Don't swallow login output — the CLI reports failures (bad token, unsupported node) on stdout.
+$CLI auth login --token "$SCALAR_TOKEN"
 
 echo "Validating OpenAPI spec..."
 $CLI document validate "$SPEC_URL"
