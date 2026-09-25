@@ -9,7 +9,8 @@ SLUG="${SLUG:-prod}"
 SPEC_URL="${SPEC_URL:-https://docs.diversifi.ai/openapi.json}"
 S3_BUCKET="${S3_BUCKET:-docs-api-diversifi-ai}"
 CLOUDFRONT_DISTRIBUTION_ID="${CLOUDFRONT_DISTRIBUTION_ID:-}"
-CLI="npx -y @scalar/cli@latest"
+CLI="npx -y @scalar/cli@2.1.0"
+SCALAR_VERSION="1.72.1"
 
 : "${SCALAR_TOKEN:?Please export SCALAR_TOKEN first}"
 
@@ -61,7 +62,7 @@ cat > "${BUILD_DIR}/index.html" <<HTML
 </head>
 <body>
   <div id="app"></div>
-  <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@${SCALAR_VERSION}"></script>
   <script>
     Scalar.createApiReference('#app', {
       url: '${SPEC_URL}',
