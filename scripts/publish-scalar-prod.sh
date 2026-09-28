@@ -78,7 +78,7 @@ aws s3 cp "${BUILD_DIR}/index.html" "s3://${S3_BUCKET}/index.html" --content-typ
 
 if [[ -n "$CLOUDFRONT_DISTRIBUTION_ID" ]]; then
   echo "Creating CloudFront invalidation on ${CLOUDFRONT_DISTRIBUTION_ID} ..."
-  aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths '/index.html' >/dev/null
+  aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths '/index.html' '/openapi.json' >/dev/null
 fi
 
 echo "Done."
