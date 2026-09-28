@@ -9,7 +9,8 @@ SLUG="${SLUG:-prod}"
 SPEC_URL="${SPEC_URL:-https://docs.diversifi.ai/openapi.json}"
 S3_BUCKET="${S3_BUCKET:-docs-api-diversifi-ai}"
 CLOUDFRONT_DISTRIBUTION_ID="${CLOUDFRONT_DISTRIBUTION_ID:-}"
-CLI="npx -y @scalar/cli@latest"
+CLI="npx -y @scalar/cli@2.1.0"
+SCALAR_VERSION="1.72.1"
 
 : "${SCALAR_TOKEN:?Please export SCALAR_TOKEN first}"
 
@@ -61,7 +62,7 @@ cat > "${BUILD_DIR}/index.html" <<HTML
 </head>
 <body>
   <div id="app"></div>
-  <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@${SCALAR_VERSION}"></script>
   <script>
     Scalar.createApiReference('#app', {
       url: '${SPEC_URL}',
@@ -77,7 +78,7 @@ aws s3 cp "${BUILD_DIR}/index.html" "s3://${S3_BUCKET}/index.html" --content-typ
 
 if [[ -n "$CLOUDFRONT_DISTRIBUTION_ID" ]]; then
   echo "Creating CloudFront invalidation on ${CLOUDFRONT_DISTRIBUTION_ID} ..."
-  aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths '/index.html' >/dev/null
+  aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths '/index.html' '/openapi.json' >/dev/null
 fi
 
 echo "Done."

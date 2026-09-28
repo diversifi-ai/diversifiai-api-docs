@@ -2,7 +2,7 @@
   "references": [
     {
       "name": "API Reference Dev",
-      "path": "https://dev.diversifi.ai/api_v1/openapi.json"
+      "path": "https://dev-docs-openapi.diversifi.ai/openapi.json"
     }
   ],
   "guides": [],
